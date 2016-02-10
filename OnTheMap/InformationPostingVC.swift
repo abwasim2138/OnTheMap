@@ -89,7 +89,7 @@ class InformationPostingVC: UIViewController, MKMapViewDelegate, UITextViewDeleg
         findAndSubmit.setTitle("POSTING", forState: .Normal)
         APIClient.postInfo(student, completionHandler: { (result, error) -> Void in
             if error != nil {
-                return self.alertUser("COULDN'T POST YOUR INFO")
+                return self.alertUser(error!.localizedDescription)
             }else{
                 self.dismissViewControllerAnimated(true, completion: nil)
             }

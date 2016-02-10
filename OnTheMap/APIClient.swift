@@ -90,13 +90,21 @@ class APIClient {
     //MARK: - PARSE
     
     static func getRequestedData (completionHandler: (success: Bool!, error: NSError?)->Void)->NSURLSessionDataTask {
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.parse.com/1/classes/StudentLocation")!)
+     
+        let params = ["limit": 100,"order":"-updatedAt"] //CITE CODE REVIEW SUGGESTION
+        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.parse.com/1/classes/StudentLocation\(escapedParameters(params))")!)
         request.addValue(Constants.parseAppID, forHTTPHeaderField: Constants.appIDHeader)
         request.addValue(Constants.restApiKey, forHTTPHeaderField: Constants.apiKeyHeader)
         let task = session.dataTaskWithRequest(request) { data, response, error in
             if error != nil {
                 return completionHandler(success: false,error: error)
             }
+            
+            //CITE: TMDBClient
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                return completionHandler(success: false, error: nil)
+            }
+            
             do {
                 let dictionary = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments) as! NSDictionary
                 guard let array = dictionary["results"] as? [[String: AnyObject]] else {
@@ -119,15 +127,33 @@ class APIClient {
         request.addValue(Constants.restApiKey, forHTTPHeaderField: Constants.apiKeyHeader)
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.HTTPBody = "{\"uniqueKey\": \"\(student.uniqueKey)\", \"firstName\": \"\(student.firstName)\", \"lastName\": \"\(student.lastName)\",\"mapString\": \"\(student.mapString)\", \"mediaURL\": \"\(student.mediaURL)\",\"latitude\": \(student.latitude), \"longitude\": \(student.longitude)}".dataUsingEncoding(NSUTF8StringEncoding)
-        
-        let session = NSURLSession.sharedSession()
+    
         let task = session.dataTaskWithRequest(request) { (data, response, error) -> Void in
             if error != nil {
-                return print(error?.localizedDescription)
+                return completionHandler(result: nil, error: error!)
             }
             APIClient.parseJSONData(data!, completionHandler: completionHandler)
         }
         task.resume()
         return task
     }
+    
+    
+    //CITE: THEMOVIEDB TUTORIAL
+    static func escapedParameters(parameters: [String : AnyObject]) -> String {
+        var urlVars = [String]()
+        for (key, value) in parameters {
+            let stringValue = "\(value)"
+            let escapedValue = stringValue.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
+            if let unwrappedEscapedValue = escapedValue {
+                urlVars += [key + "=" + "\(unwrappedEscapedValue)"]
+            } else {
+                print("Warning: trouble excaping string \"\(stringValue)\"")
+            }
+        }
+        return (!urlVars.isEmpty ? "?" : "") + urlVars.joinWithSeparator("&")
+    }
+    
+
+    
 }

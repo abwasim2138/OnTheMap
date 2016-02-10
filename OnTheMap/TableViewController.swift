@@ -10,10 +10,8 @@ import UIKit
 
 class TableViewController: UITableViewController {
 
-    private var studentInformation = [StudentInformation]()
     override func viewDidLoad() {
         super.viewDidLoad()
-        studentInformation = (StudentCollection.studentCollection.students)
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.tableView.reloadData()
         })
@@ -21,7 +19,7 @@ class TableViewController: UITableViewController {
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        guard studentInformation.count != 0 else {
+        guard StudentCollection.studentCollection.students.count != 0 else {
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 let alertController = UIAlertController(title: "Failed To Download Info", message: "", preferredStyle: .Alert)
                 let okayAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
@@ -35,21 +33,23 @@ class TableViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 100
+        return StudentCollection.studentCollection.students.count
     }
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
+        let student = StudentCollection.studentCollection.students[indexPath.row]
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
         cell.imageView?.image = UIImage(named: "pin")
-        cell.textLabel?.text =  "\(studentInformation[indexPath.row].firstName) \(studentInformation[indexPath.row].lastName)"
+        cell.textLabel?.text =  "\(student.firstName) \(student.lastName)"
+        cell.detailTextLabel?.text = student.mapString
     
         return cell
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         var http = "http://"
-         let urlString = studentInformation[indexPath.row].mediaURL
+         let urlString = StudentCollection.studentCollection.students[indexPath.row].mediaURL
             if urlString.containsString("//") == true {
                 http = ""
                 }

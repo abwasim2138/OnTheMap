@@ -25,11 +25,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
  
     func getData () {
-        if studentInformation.count == 0 {
+        if annotations.count == 0 {
             APIClient.getRequestedData({ (success, error) -> Void in
-                guard error == nil else {
+                guard error == nil && success == true else {
                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        let alertController = UIAlertController(title: error?.localizedDescription, message: "", preferredStyle: .Alert)
+                        let alertController = UIAlertController(title: "Failed To Download Info", message: "", preferredStyle: .Alert)
                         let okayAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
                         alertController.addAction(okayAction)
                         self.presentViewController(alertController, animated: true, completion: nil)
@@ -37,7 +37,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 return
                 }
             })
-            studentInformation = (StudentCollection.studentCollection.students)
             for student in StudentCollection.studentCollection.students {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: student.latitude, longitude: student.longitude)
@@ -99,7 +98,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
 
     @IBAction func refresh(sender: UIBarButtonItem) {
-        studentInformation.removeAll()
+        //StudentCollection.studentCollection.students.removeAll()
         mapView.removeAnnotations(annotations)
         annotations.removeAll()
         getData()
