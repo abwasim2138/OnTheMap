@@ -129,6 +129,9 @@ class APIClient {
         request.HTTPBody = "{\"uniqueKey\": \"\(student.uniqueKey)\", \"firstName\": \"\(student.firstName)\", \"lastName\": \"\(student.lastName)\",\"mapString\": \"\(student.mapString)\", \"mediaURL\": \"\(student.mediaURL)\",\"latitude\": \(student.latitude), \"longitude\": \(student.longitude)}".dataUsingEncoding(NSUTF8StringEncoding)
     
         let task = session.dataTaskWithRequest(request) { (data, response, error) -> Void in
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                return completionHandler(result: nil, error: nil)
+            }
             if error != nil {
                 return completionHandler(result: nil, error: error!)
             }

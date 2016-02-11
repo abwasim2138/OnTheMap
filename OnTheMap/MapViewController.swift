@@ -12,7 +12,6 @@ import MapKit
 class MapViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet var mapView: MKMapView!
-    private var studentInformation = [StudentInformation]()
     private var annotations = [MKAnnotation]()
     private var isPinView = false
     private var oldRegion = MKCoordinateRegion()

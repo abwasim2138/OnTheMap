@@ -85,13 +85,18 @@ class InformationPostingVC: UIViewController, MKMapViewDelegate, UITextViewDeleg
     
     func submitInfo () {
         if let account = StudentCollection.studentCollection.myAccount {
-        let student = StudentInformation(uniqueKey: "OPTIONAL", firstName: account["first_name"] as! String, lastName: account["last_name"] as! String, latitude: coord.coordinate.latitude, longitude: coord.coordinate.longitude,mapString: mapString, mediaURL: infoTextView.text)
+        let firstName = account["first_name"] as! String
+        let lastName = account["last_name"] as! String
+        let student = StudentInformation(uniqueKey: "OPTIONAL", firstName: firstName, lastName: lastName, latitude: coord.coordinate.latitude, longitude: coord.coordinate.longitude,mapString: mapString, mediaURL: infoTextView.text)
         findAndSubmit.setTitle("POSTING", forState: .Normal)
         APIClient.postInfo(student, completionHandler: { (result, error) -> Void in
+            print("RESULT: \(result)")
             if error != nil {
                 return self.alertUser(error!.localizedDescription)
-            }else{
+            }else if result != nil {
                 self.dismissViewControllerAnimated(true, completion: nil)
+            }else {
+                return self.alertUser("Sorry \(firstName) Couldn't Post To The Network")
             }
             })
         }
